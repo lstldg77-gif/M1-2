@@ -1,0 +1,29 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+# Local data and generated output
+services/local_db.json
+Output/
+*.mp3
+*.wav
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build and test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
