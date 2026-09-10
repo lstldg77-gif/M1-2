@@ -12,4 +12,4 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 APIFRAME_API_KEY = os.getenv("APIFRAME_API_KEY", "").strip()
 FIREBASE_SERVICE_ACCOUNT_JSON = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "").strip()
 ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "*").split(",")]
-MUSIC_DOWNLOAD_DIR = os.getenv("MUSIC_DOWNLOAD_DIR", r"C:\Users\DiCiA\PycharmProjects\M1-2_Project\Output").strip()
+MUSIC_DOWNLOAD_DIR = os.getenv("MUSIC_DOWNLOAD_DIR", "Output").strip()

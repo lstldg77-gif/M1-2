@@ -12,7 +12,7 @@
 
 **사용자의 일상과 컨디션 시계열 데이터를 깊이 이해하고, 실시간 맞춤형 힐링 음악(Suno AI)을 기획하여 내 PC로 자동 다운로드해 주는 올인원 AI 에이전트 시스템**
 
-[🌐 웹 대시보드](https://a1-3-project.vercel.app/) • [📖 Swagger API 문서](https://ai-assistant-backend.onrender.com/docs) • [🚀 빠른 시작](#4-로컬-실행-가이드-quick-start)
+[🌐 웹 대시보드](https://github.com/lstldg77-gif/M1-2) • [📖 Swagger API 문서](#6-rest-api-명세-api-reference) • [🚀 빠른 시작](#4-로컬-실행-가이드-quick-start)
 
 </div>
 
