@@ -333,3 +333,58 @@ flowchart LR
 ## 10. �📄 라이선스 (License)
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 11. 🧠 핵심 설계 설명 및 발표 답변 정리
+
+### 1) 시계열 데이터 분석과 서비스 활용 흐름
+
+사용자의 날짜별 컨디션·기분 점수와 메모를 `data` 컬렉션 또는 로컬 JSON 저장소에 기록합니다. `/api/data/summary`가 저장된 데이터를 날짜순으로 읽어 기간, 기록 수, 총합, 평균, 최댓값, 최솟값, 최근 추세를 계산합니다. 이 요약 결과는 데이터 관리 화면의 통계 카드와 Chart.js 그래프에 사용되고, AI 채팅 요청이 들어오면 시스템 프롬프트의 컨텍스트로도 전달됩니다.
+
+```mermaid
+flowchart LR
+        INPUT[날짜·점수·메모 입력] --> CRUD[/api/data CRUD]
+        CRUD --> STORE[(Firestore 또는 local_db.json)]
+        STORE --> SUMMARY[/api/data/summary]
+        SUMMARY --> DASHBOARD[통계 카드·추세 그래프]
+        SUMMARY --> CONTEXT[AI 시스템 프롬프트]
+```
+
+### 2) FastAPI 라우터·서비스 분리 기준
+
+`main.py`는 애플리케이션 생성, 미들웨어, 라우터 등록, 정적 파일 제공처럼 전체 조립만 담당합니다. 기능별 HTTP 경로는 `routers/`에 분리하고, 실제 데이터 저장·AI 호출·Suno API 통신은 `services/`에 둡니다. 따라서 라우터는 요청을 받고 검증된 데이터를 서비스에 전달하는 역할에 집중하며, 저장소나 외부 API 구현이 바뀌어도 화면과 라우터의 영향을 줄일 수 있습니다.
+
+- `routers/data_router.py`: 시계열 데이터 CRUD와 요약 API
+- `routers/chat_router.py`: AI 대화 API
+- `routers/conversations_router.py`: 대화 기록 CRUD
+- `routers/music_router.py`: Suno 프롬프트 기획·생성·상태·다운로드 API
+- `services/firestore_service.py`: Firestore 및 로컬 JSON 저장소 처리
+- `services/ai_service.py`: 컨텍스트 구성과 AI 응답·프롬프트 기획
+- `services/suno_service.py`: Apiframe Suno API 통신과 MP3 저장
+
+### 3) Pydantic 요청 검증을 사용하는 이유와 방식
+
+클라이언트 입력을 서비스 로직에 전달하기 전에 타입과 필수 필드를 자동 검증하기 위해 Pydantic을 사용합니다. 예를 들어 `DataItemCreate`는 `date`, `value`, `memo`의 형식과 필수 여부를 정의하고, `MusicPlanRequest`는 음악 기획에 필요한 기분·컨디션·곡 수를 정의합니다. FastAPI는 이 모델을 엔드포인트 매개변수에 선언하면 잘못된 JSON이나 누락된 필드에 자동으로 `422` 검증 오류를 반환합니다. 덕분에 서비스 계층은 기본 입력 검사를 반복하지 않고 업무 로직에 집중할 수 있습니다.
+
+### 4) Firestore 저장과 CRUD 처리
+
+Firestore를 사용할 수 있으면 컬렉션의 문서로 데이터를 저장하고, 문서 ID를 응답에 포함합니다. 생성은 `add`, 조회는 컬렉션 조회 또는 문서 조회, 수정은 `update`, 삭제는 `delete`로 처리합니다. Firestore 설정이 없거나 초기화되지 않은 로컬 환경에서는 `services/local_db.json` 또는 프로젝트 로컬 저장소로 자동 전환하는 폴백 구조를 사용합니다. 이 방식으로 개발·시연 환경과 배포 환경의 저장 방식을 같은 API 계약으로 유지할 수 있습니다.
+
+### 5) 컨텍스트 주입의 원리
+
+AI에게 사용자의 원본 데이터를 매번 그대로 전달하는 대신, 먼저 통계 요약을 만들고 이를 시스템 프롬프트에 삽입합니다. 현재 평균 컨디션, 최고·최저값, 기록 기간, 최근 추세를 AI의 역할과 응답 원칙 앞에 함께 제공하므로, AI가 단순한 일반 답변이 아니라 사용자의 최근 상태를 반영한 공감·음악 추천을 만들 수 있습니다.
+
+```text
+사용자 메시지
+    → get_data_summary()
+    → 기간·평균·최고·최저·추세를 시스템 프롬프트에 주입
+    → OpenAI 또는 Gemini 호출
+    → 컨디션을 반영한 답변과 Suno 프롬프트 반환
+```
+
+### 6) 배포 환경에서 CORS·환경변수·키 관리가 필요한 이유
+
+- **CORS**: Vercel 같은 프런트엔드 주소와 Render 같은 백엔드 주소가 달라질 때 브라우저의 교차 출처 요청을 허용해야 합니다. 허용 출처는 환경에 맞게 제한하는 것이 좋습니다.
+- **환경변수**: 개발·배포 환경마다 API 주소, 데이터베이스 설정, 다운로드 경로가 다르므로 코드와 설정을 분리해야 합니다.
+- **키 관리**: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `APIFRAME_API_KEY`, Firebase 인증 정보는 외부에 노출되면 안 됩니다. `.env`와 배포 플랫폼의 Secret 환경변수에만 저장하고, `.gitignore`로 GitHub 커밋 대상에서 제외합니다.
+
+발표 시에는 “프런트엔드는 API 주소만 알고, 비밀키는 백엔드 환경변수에서만 사용한다. CORS는 실제 프런트엔드 출처만 허용하도록 운영 환경에서 조정한다”고 설명할 수 있습니다.
