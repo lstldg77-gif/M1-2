@@ -16,7 +16,6 @@
 
 </div>
 
----
 
 ## 1. 📌 프로젝트 개요 (Overview)
 
@@ -31,7 +30,6 @@
 4. **듀얼 인터페이스 지원**: 웹 브라우저용 반응형 대시보드(Glassmorphism Web) + PyQt5 기반 독립형 네이티브 데스크톱 GUI 프로그램 제공
 5. **안정적인 폴백(Fallback) 아키텍처**: Firestore 미설정 시 로컬 JSON DB 자동 전환, OpenAI 미설정 시 Google Gemini 2.0 자동 전환
 
----
 
 ## 2. 🏛️ 시스템 아키텍처 & 데이터 흐름 (Architecture)
 
@@ -76,7 +74,6 @@ flowchart TD
     SUNO_SVC --> LOCAL_DISK
 ```
 
----
 
 ## 3. 🛠️ 기술 스택 (Tech Stack)
 
@@ -90,7 +87,6 @@ flowchart TD
 | **Frontend** | Vanilla HTML5, Modern CSS3 (Glassmorphism), JavaScript (ES6+), Chart.js | 반응형 웹 UI, 시계열 통계 인터랙티브 차트 |
 | **Deployment** | Render (백엔드 Web Service), Vercel (프론트엔드 정적 호스팅) | 클라우드 자동 지속적 배포 환경 |
 
----
 
 ## 4. 🚀 로컬 실행 가이드 (Quick Start)
 
@@ -150,11 +146,7 @@ python app_gui.py
 ```bash
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
-- **웹 대시보드 접속**: `http://127.0.0.1:8000` 또는 `http://localhost:8000`
-- **인터랙티브 API 문서 (Swagger UI)**: `http://127.0.0.1:8000/docs`
-- **ReDoc 문서**: `http://127.0.0.1:8000/redoc`
 
----
 
 ## 5. 📂 디렉토리 구조 (Directory Structure)
 
@@ -196,33 +188,28 @@ M1-2/
     └── suno_prompts_with_lyrics.csv
 ```
 
----
 
 ## 6. 🔌 REST API 명세 (API Reference)
 
 ### 1) AI Chat (`/api/chat`)
-- `POST /api/chat`: 시계열 데이터 요약이 주입된 AI 응답 생성 및 대화 자동 저장
 
 ### 2) Time Series Data (`/api/data`)
-- `POST /api/data`: 새 시계열 컨디션/기분 데이터 추가 (`date`, `value`, `memo`)
-- `GET /api/data`: 저장된 전체 시계열 데이터 목록 조회
-- `GET /api/data/summary`: AI 시스템 프롬프트 주입용 통계 요약 (평균, 최고/최저, 추세 등)
-- `PUT /api/data/{data_id}`: 특정 데이터 항목 수정
-- `DELETE /api/data/{data_id}`: 특정 데이터 항목 삭제
 
 ### 3) Conversations History (`/api/conversations`)
-- `GET /api/conversations`: 이전 대화 세션 목록 조회
-- `GET /api/conversations/{conv_id}`: 특정 대화 상세 메세지 불러오기 (Load UX)
-- `POST /api/conversations`: 대화 세션 수동 저장
-- `DELETE /api/conversations/{conv_id}`: 특정 대화 세션 삭제
 
 ### 4) Suno AI Music (`/api/music`)
-- `POST /api/music/plan`: 사용자 상태 기반 1/5/10/15개 Suno 음악 프롬프트 자동 기획 (`count` 필드)
-- `POST /api/music/generate`: 선택한 프롬프트로 Apiframe Suno v2 음원 생성 요청
-- `GET /api/music/status/{task_id}`: 작업 진행 상태 확인 (`PENDING` ➔ `SUCCESS`, MP3 URL 반환)
-- `POST /api/music/download`: 생성된 음원을 내 PC 로컬 디렉토리로 다운로드
 
----
+### 웹에서 여러 곡 생성 및 관리
+
+웹 대시보드의 **Suno AI 스튜디오**에서 생성할 곡 수를 `1/5/10/15개` 중 선택할 수 있습니다.
+
+1. `선택한 개수만큼 프롬프트 생성하기`를 클릭합니다.
+2. `생성된 프롬프트 전체 음원 자동 생성`을 클릭하면 선택된 곡을 순차적으로 생성합니다.
+3. 생성이 완료된 곡은 목록에서 브라우저로 미리듣기할 수 있습니다.
+4. 곡별로 웹 다운로드, `Output/YYYY-MM-DD/` PC 저장, 목록 삭제를 사용할 수 있습니다.
+
+실제 음원 생성을 위해서는 `.env`에 `APIFRAME_API_KEY`를 설정해야 합니다. 생성된 MP3 파일은 `.gitignore`에 의해 GitHub에 업로드되지 않습니다.
+
 
 ## 7. 🎯 주요 화면 및 기능 안내 (Features Showcase)
 
@@ -234,8 +221,9 @@ M1-2/
     - 보컬 곡(가사 생성 포함) 또는 연주곡(Instrumental) 모드를 선택하고 악기·선택 사항을 입력하여 1/5/10/15개의 다채로운 테마 프롬프트를 자동 생성.
 4. **⚡ 실시간 음원 생성 & 로컬 PC 자동 저장**
    - 생성 요청 후 실시간 프로그레스 바로 상태를 추적하고, 완성 시 내 PC의 `Output/YYYY-MM-DD/` 폴더에 MP3 파일로 즉시 영구 저장.
+5. **🎧 생성 음원 미리듣기 & 관리**
+    - 1/5/10/15곡을 순차 자동 생성하고, 완료된 곡부터 브라우저 미리듣기·웹 다운로드·PC 저장·개별 삭제를 제공합니다.
 
----
 
 ## 8. �️ 실행 화면 캡처 (Run Screenshots)
 
@@ -247,7 +235,6 @@ M1-2/
 ### 데이터 관리 화면
 ![데이터 관리 화면](실행화면_데이터관리.png)
 
----
 
 ## 9. �📄 라이선스 (License)
 
