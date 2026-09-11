@@ -270,6 +270,9 @@
                 <button class="btn btn-primary btn-block mt-3" onclick="planMusicPrompts()">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ 선택한 개수만큼 프롬프트 생성하기
                 </button>
+                <button class="btn btn-success btn-block mt-2" id="generate-all-btn" onclick="generateAllSunoTracks()" disabled>
+                    <i class="fa-solid fa-layer-group"></i> 생성된 프롬프트 전체 음원 자동 생성
+                </button>
             </div>
 
             <!-- Generation Monitor Box -->
@@ -304,6 +307,15 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <div id="generated-tracks-card" class="card generated-tracks-card" style="display:none;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-headphones"></i> 생성된 음원 목록</h3>
+                    <span id="generated-tracks-count" class="badge badge-info">0곡</span>
+                </div>
+                <p class="text-muted">완료된 곡은 이 화면에서 바로 미리듣고, 다운로드하거나 목록에서 삭제할 수 있습니다.</p>
+                <div id="generated-tracks-list" class="generated-tracks-list"></div>
             </div>
 
             <!-- Prompts Grid List -->

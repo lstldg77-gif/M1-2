@@ -645,6 +645,58 @@ body.light-theme .card {
     font-family: monospace;
 }
 
+.generated-tracks-card {
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.generated-tracks-list {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.generated-track {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1.2fr) auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.generated-track h4 {
+    font-size: 0.95rem;
+}
+
+.generated-track audio {
+    width: 100%;
+    min-width: 0;
+}
+
+.generated-track-actions {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.generated-track-error {
+    border-color: rgba(251, 113, 133, 0.45);
+    background: rgba(244, 63, 94, 0.08);
+}
+
+@media (max-width: 800px) {
+    .generated-track {
+        grid-template-columns: 1fr;
+    }
+
+    .generated-track-actions {
+        justify-content: flex-start;
+    }
+}
+
 /* Progress & Monitor */
 .progress-bar-container {
     width: 100%;

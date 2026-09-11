@@ -5,6 +5,8 @@ let currentChart = null;
 let currentTaskPollInterval = null;
 let currentGeneratedAudioUrl = null;
 let currentTrackTitle = "Suno_Track";
+let plannedMusicPrompts = [];
+let generatedTracks = [];
 
 // --- DOM Loaded Initialization ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -422,6 +424,9 @@ async function planMusicPrompts() {
         }
 
         const data = await res.json();
+        plannedMusicPrompts = data.prompts || [];
+        const generateAllButton = document.getElementById("generate-all-btn");
+        if (generateAllButton) generateAllButton.disabled = plannedMusicPrompts.length === 0;
         renderPromptsGrid(data.prompts);
     } catch (e) {
         grid.innerHTML = `<div class="prompt-placeholder">❌ 오류: ${e.message}</div>`;
@@ -431,8 +436,11 @@ async function planMusicPrompts() {
 function renderPromptsGrid(prompts) {
     const grid = document.getElementById("prompts-grid");
     grid.innerHTML = "";
+    plannedMusicPrompts = prompts || [];
+    const generateAllButton = document.getElementById("generate-all-btn");
+    if (generateAllButton) generateAllButton.disabled = plannedMusicPrompts.length === 0;
 
-    prompts.forEach((p, idx) => {
+    plannedMusicPrompts.forEach((p, idx) => {
         const card = document.createElement("div");
         card.className = "prompt-card";
 
@@ -456,6 +464,150 @@ function renderPromptsGrid(prompts) {
         `;
         grid.appendChild(card);
     });
+}
+
+async function generateAllSunoTracks() {
+    if (!plannedMusicPrompts.length) {
+        alert("먼저 생성할 음악 프롬프트를 만들어 주세요.");
+        return;
+    }
+
+    const button = document.getElementById("generate-all-btn");
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 전체 음원 생성 중...';
+    }
+
+    const monitor = document.getElementById("generation-monitor");
+    const total = plannedMusicPrompts.length;
+    let completed = 0;
+    let failed = 0;
+
+    for (const promptItem of plannedMusicPrompts) {
+        const title = promptItem.title || `Track ${completed + failed + 1}`;
+        const prompt = promptItem.suno_prompt || "";
+        const lyrics = promptItem.lyrics || "[Instrumental]";
+        if (monitor) {
+            monitor.style.display = "block";
+            document.getElementById("monitor-task-id").textContent = `전체 생성 ${completed + failed + 1}/${total}`;
+            document.getElementById("monitor-status-text").textContent = `${title} 생성 중...`;
+        }
+
+        try {
+            const track = await requestAndWaitForTrack(prompt, title, lyrics);
+            generatedTracks.push(track);
+            completed += 1;
+            renderGeneratedTracks();
+        } catch (error) {
+            failed += 1;
+            generatedTracks.push({ title, prompt, status: "ERROR", error: error.message });
+            renderGeneratedTracks();
+        }
+    }
+
+    if (monitor) monitor.style.display = "none";
+    if (button) {
+        button.disabled = false;
+        button.innerHTML = '<i class="fa-solid fa-layer-group"></i> 생성된 프롬프트 전체 음원 자동 생성';
+    }
+    alert(`전체 생성 작업이 끝났습니다. 성공 ${completed}곡, 실패 ${failed}곡`);
+}
+
+async function requestAndWaitForTrack(prompt, title, lyrics) {
+    const res = await fetch(`${API_BASE_URL}/api/music/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, title, lyrics })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "음원 생성 요청 실패");
+
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+        const statusRes = await fetch(`${API_BASE_URL}/api/music/status/${data.task_id}`);
+        const statusData = await statusRes.json();
+        if (statusData.status === "SUCCESS" && statusData.audio_url) {
+            return { title, prompt, audioUrl: statusData.audio_url, status: "SUCCESS" };
+        }
+        if (["ERROR", "FAILED", "FAILURE"].includes(statusData.status)) {
+            throw new Error(statusData.message || "음원 생성 실패");
+        }
+        const progress = Math.min(95, 20 + attempt * 1.2);
+        document.getElementById("progress-bar-fill").style.width = `${progress}%`;
+        await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+    throw new Error("생성 시간이 초과되었습니다.");
+}
+
+function renderGeneratedTracks() {
+    const card = document.getElementById("generated-tracks-card");
+    const list = document.getElementById("generated-tracks-list");
+    const count = document.getElementById("generated-tracks-count");
+    if (!card || !list || !count) return;
+
+    card.style.display = generatedTracks.length ? "block" : "none";
+    count.textContent = `${generatedTracks.length}곡`;
+    list.innerHTML = "";
+
+    generatedTracks.forEach((track, index) => {
+        const item = document.createElement("article");
+        item.className = `generated-track ${track.status === "ERROR" ? "generated-track-error" : ""}`;
+        const title = document.createElement("h4");
+        title.textContent = `${index + 1}. ${track.title}`;
+        item.appendChild(title);
+
+        if (track.status === "ERROR") {
+            const error = document.createElement("p");
+            error.className = "text-muted";
+            error.textContent = `생성 실패: ${track.error}`;
+            item.appendChild(error);
+        } else {
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.preload = "metadata";
+            audio.src = track.audioUrl;
+            item.appendChild(audio);
+
+            const actions = document.createElement("div");
+            actions.className = "generated-track-actions";
+            actions.innerHTML = `
+                <button class="btn btn-sm btn-success"><i class="fa-solid fa-desktop"></i> PC 저장</button>
+                <button class="btn btn-sm btn-outline"><i class="fa-solid fa-download"></i> 다운로드</button>
+                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> 삭제</button>`;
+            actions.children[0].addEventListener("click", () => downloadTrackToLocalPC(track));
+            actions.children[1].addEventListener("click", () => downloadTrackInBrowser(track));
+            actions.children[2].addEventListener("click", () => {
+                generatedTracks.splice(index, 1);
+                renderGeneratedTracks();
+            });
+            item.appendChild(actions);
+        }
+        list.appendChild(item);
+    });
+}
+
+async function downloadTrackToLocalPC(track) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/music/download`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ audio_url: track.audioUrl, file_name: `${track.title}.mp3` })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "다운로드 실패");
+        alert(`내 PC에 저장했습니다.\n${data.file_path}`);
+    } catch (error) {
+        alert(`PC 저장 실패: ${error.message}`);
+    }
+}
+
+function downloadTrackInBrowser(track) {
+    const link = document.createElement("a");
+    link.href = track.audioUrl;
+    link.target = "_blank";
+    link.download = `${track.title}.mp3`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 }
 
 function switchToMusicAndGenerate(title, prompt, lyrics) {

@@ -237,6 +237,18 @@ M1-2/
 
 ---
 
-## 8. 📄 라이선스 (License)
+## 8. �️ 실행 화면 캡처 (Run Screenshots)
+
+아래 이미지는 실제 로컬 실행 화면을 캡처한 결과입니다.
+
+### 메인 대시보드
+![메인 대시보드](실행화면_메인.png)
+
+### 데이터 관리 화면
+![데이터 관리 화면](실행화면_데이터관리.png)
+
+---
+
+## 9. �📄 라이선스 (License)
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
