@@ -156,6 +156,14 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 - **인터랙티브 API 문서 (Swagger UI)**: `http://127.0.0.1:8000/docs`
 - **ReDoc 문서**: `http://127.0.0.1:8000/redoc`
 
+### 5) 실행 옵션 C: Streamlit 보조 대시보드
+```bash
+streamlit run app.py --server.port 8501
+```
+- **Streamlit 접속**: `http://127.0.0.1:8501`
+
+최종 웹 버전은 FastAPI가 제공하는 `http://127.0.0.1:8000`입니다. Streamlit 앱은 로컬 데이터 관리와 간단한 AI 채팅을 확인하는 보조 화면입니다.
+
 ---
 
 ## 5. 📂 디렉토리 구조 (Directory Structure)
@@ -198,6 +206,21 @@ M1-2/
     └── suno_prompts_with_lyrics.csv
 ```
 
+### 로컬 생성 자료
+
+실제 생성 결과와 Flow 작업 자료는 보안 및 용량 때문에 GitHub에 올리지 않고 로컬 `Output/` 폴더에 보관합니다.
+
+```text
+Output/
+├── YYYY-MM-DD/                         # 날짜별 생성 MP3
+├── flow_music_10_tracks.md             # 제목·가사 요약·스타일·Flow 장면 프롬프트
+├── flow_music_10_tracks.json            # 재사용 가능한 구조화 프롬프트
+├── flow_music_10_tracks_full_lyrics.md # 10곡 전체 가사
+└── suno_prompts_*.csv                  # Suno 프롬프트 원본
+```
+
+생성된 MP3는 `Output/YYYY-MM-DD/`에 저장됩니다. 웹 화면에서 곡을 삭제하면 브라우저의 생성 목록에서만 제거되며, PC에 저장된 MP3 파일은 삭제하거나 수정하지 않습니다.
+
 ---
 
 ## 6. 🔌 REST API 명세 (API Reference)
@@ -234,6 +257,20 @@ M1-2/
 4. 곡별로 웹 다운로드, `Output/YYYY-MM-DD/` PC 저장, 목록 삭제를 사용할 수 있습니다.
 
 실제 음원 생성을 위해서는 `.env`에 `APIFRAME_API_KEY`를 설정해야 합니다. 생성된 MP3 파일은 `.gitignore`에 의해 GitHub에 업로드되지 않습니다.
+
+### Flow 이미지·영상 제작 자료
+
+`flow_music_10_tracks_full_lyrics.md`에는 각 곡의 전체 가사가 다음 구조로 정리되어 있습니다.
+
+- Verse 1
+- Pre-Chorus
+- Chorus
+- Verse 2
+- Bridge
+- Final Chorus
+- Outro
+
+각 곡에는 제목, 테마, Suno 스타일, 전체 가사, Google Flow용 장면 프롬프트가 함께 포함되어 있습니다. 가사는 이미지 안에 직접 삽입하기보다 장면의 감정과 영상 콘셉트를 설계하는 참고 자료로 사용하는 것을 권장합니다.
 
 
 ## 7. 🎯 주요 화면 및 기능 안내 (Features Showcase)
