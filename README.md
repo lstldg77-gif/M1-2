@@ -208,13 +208,13 @@ M1-2/
 
 ### 로컬 생성 자료
 
-실제 생성 결과와 Flow 작업 자료는 보안 및 용량 때문에 GitHub에 올리지 않고 로컬 `Output/` 폴더에 보관합니다.
+실제 생성 MP3는 보안 및 용량 때문에 GitHub에 올리지 않고 로컬 `Output/` 폴더에 보관합니다. Flow 작업 자료 3개는 재사용을 위해 GitHub에 함께 제공합니다.
 
 ```text
 Output/
 ├── YYYY-MM-DD/                         # 날짜별 생성 MP3
 ├── flow_music_10_tracks.md             # 제목·가사 요약·스타일·Flow 장면 프롬프트
-├── flow_music_10_tracks.json            # 재사용 가능한 구조화 프롬프트
+├── flow_music_10_tracks.json           # 재사용 가능한 구조화 프롬프트
 ├── flow_music_10_tracks_full_lyrics.md # 10곡 전체 가사
 └── suno_prompts_*.csv                  # Suno 프롬프트 원본
 ```
@@ -256,7 +256,7 @@ Output/
 3. 생성이 완료된 곡은 목록에서 브라우저로 미리듣기할 수 있습니다.
 4. 곡별로 웹 다운로드, `Output/YYYY-MM-DD/` PC 저장, 목록 삭제를 사용할 수 있습니다.
 
-실제 음원 생성을 위해서는 `.env`에 `APIFRAME_API_KEY`를 설정해야 합니다. 생성된 MP3 파일은 `.gitignore`에 의해 GitHub에 업로드되지 않습니다.
+실제 음원 생성을 위해서는 `.env`에 `APIFRAME_API_KEY`를 설정해야 합니다. 생성된 MP3 파일은 `.gitignore`에 의해 GitHub에 업로드되지 않으며, Flow 자료만 저장소에 포함됩니다.
 
 ### Flow 이미지·영상 제작 자료
 
