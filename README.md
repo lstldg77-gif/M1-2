@@ -16,6 +16,7 @@
 
 </div>
 
+---
 
 ## 1. 📌 프로젝트 개요 (Overview)
 
@@ -30,6 +31,7 @@
 4. **듀얼 인터페이스 지원**: 웹 브라우저용 반응형 대시보드(Glassmorphism Web) + PyQt5 기반 독립형 네이티브 데스크톱 GUI 프로그램 제공
 5. **안정적인 폴백(Fallback) 아키텍처**: Firestore 미설정 시 로컬 JSON DB 자동 전환, OpenAI 미설정 시 Google Gemini 2.0 자동 전환
 
+---
 
 ## 2. 🏛️ 시스템 아키텍처 & 데이터 흐름 (Architecture)
 
@@ -74,6 +76,7 @@ flowchart TD
     SUNO_SVC --> LOCAL_DISK
 ```
 
+---
 
 ## 3. 🛠️ 기술 스택 (Tech Stack)
 
@@ -88,7 +91,10 @@ flowchart TD
 | **Deployment** | Render (백엔드 Web Service), Vercel (프론트엔드 정적 호스팅) | 클라우드 자동 지속적 배포 환경 |
 
 
+---
+
 ## 4. 🚀 로컬 실행 가이드 (Quick Start)
+
 
 ### 1) 저장소 클론 및 가상환경 설정
 ```bash
@@ -146,7 +152,11 @@ python app_gui.py
 ```bash
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
+- **웹 대시보드 접속**: `http://127.0.0.1:8000` 또는 `http://localhost:8000`
+- **인터랙티브 API 문서 (Swagger UI)**: `http://127.0.0.1:8000/docs`
+- **ReDoc 문서**: `http://127.0.0.1:8000/redoc`
 
+---
 
 ## 5. 📂 디렉토리 구조 (Directory Structure)
 
@@ -188,16 +198,31 @@ M1-2/
     └── suno_prompts_with_lyrics.csv
 ```
 
+---
 
 ## 6. 🔌 REST API 명세 (API Reference)
 
 ### 1) AI Chat (`/api/chat`)
+- `POST /api/chat`: 시계열 데이터 요약이 주입된 AI 응답 생성 및 대화 자동 저장
 
 ### 2) Time Series Data (`/api/data`)
+- `POST /api/data`: 새 시계열 컨디션/기분 데이터 추가 (`date`, `value`, `memo`)
+- `GET /api/data`: 저장된 전체 시계열 데이터 목록 조회
+- `GET /api/data/summary`: AI 시스템 프롬프트 주입용 통계 요약 (평균, 최고/최저, 추세 등)
+- `PUT /api/data/{data_id}`: 특정 데이터 항목 수정
+- `DELETE /api/data/{data_id}`: 특정 데이터 항목 삭제
 
 ### 3) Conversations History (`/api/conversations`)
+- `GET /api/conversations`: 이전 대화 세션 목록 조회
+- `GET /api/conversations/{conv_id}`: 특정 대화 상세 메세지 불러오기 (Load UX)
+- `POST /api/conversations`: 대화 세션 수동 저장
+- `DELETE /api/conversations/{conv_id}`: 특정 대화 세션 삭제
 
 ### 4) Suno AI Music (`/api/music`)
+- `POST /api/music/plan`: 사용자 상태 기반 1/5/10/15개 Suno 음악 프롬프트 자동 기획 (`count` 필드)
+- `POST /api/music/generate`: 선택한 프롬프트로 Apiframe Suno v2 음원 생성 요청
+- `GET /api/music/status/{task_id}`: 작업 진행 상태 확인 (`PENDING` ➔ `SUCCESS`, MP3 URL 반환)
+- `POST /api/music/download`: 생성된 음원을 내 PC 로컬 디렉토리로 다운로드
 
 ### 웹에서 여러 곡 생성 및 관리
 
