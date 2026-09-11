@@ -15,7 +15,28 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSummaryData();
     loadDataTable();
     loadConversationsList();
+    initMusicCountOptions();
 });
+
+function initMusicCountOptions() {
+    document.querySelectorAll('input[name="prompt-count"]').forEach(option => {
+        option.addEventListener("change", () => {
+            const count = Number(option.value);
+            const grid = document.getElementById("prompts-grid");
+            const sectionTitle = document.getElementById("prompts-section-title");
+            const generateAllButton = document.getElementById("generate-all-btn");
+
+            plannedMusicPrompts = [];
+            if (generateAllButton) generateAllButton.disabled = true;
+            if (sectionTitle) {
+                sectionTitle.innerHTML = `<i class="fa-solid fa-list-check"></i> ${count}가지 추천 Suno 프롬프트 목록`;
+            }
+            if (grid) {
+                grid.innerHTML = `<div class="prompt-placeholder">${count}곡으로 바꾸었습니다. 아래 버튼을 눌러 새 프롬프트를 생성하세요.</div>`;
+            }
+        });
+    });
+}
 
 // --- Tab Switching ---
 function initTabs() {
